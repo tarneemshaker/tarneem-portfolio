@@ -95,6 +95,8 @@ main { padding: 44px 0 70px; }
 /* ---- CARDS (projects / certificates) ---- */
 #list { display: grid; gap: 18px; }
 .card { border: 1px solid var(--line); background: var(--panel); padding: 22px; }
+a.card-link { display: block; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s; }
+a.card-link:hover { border-color: var(--accent); transform: translateY(-2px); }
 .card .sheet-no { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--muted); border: 1px solid var(--line); padding: 2px 7px; display: inline-block; margin-bottom: 12px; }
 .card h3 { font-size: 1.12rem; margin-bottom: 4px; }
 .card .ctx { color: var(--muted); font-size: 0.9rem; margin-bottom: 10px; }
@@ -102,6 +104,18 @@ main { padding: 44px 0 70px; }
 .tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: var(--muted); border: 1px solid var(--line); padding: 3px 9px; }
 .card a.link { display: inline-block; margin-top: 12px; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
 .card a.link:hover { text-decoration: underline; }
+
+/* ---- PROJECT DETAIL PAGE ---- */
+.back-link { display: inline-block; margin: 28px 0 20px; color: var(--muted); text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; }
+.back-link:hover { color: var(--accent); }
+.detail-head { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 26px; }
+.detail-head h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.detail-block { margin-bottom: 34px; }
+.detail-block h2 { font-size: 1rem; font-family: 'IBM Plex Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 14px; }
+.photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.photo-gallery a { display: block; aspect-ratio: 4/3; border: 1px solid var(--line); overflow: hidden; }
+.photo-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 .photo-strip { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
 .photo-strip a { display: block; width: 110px; height: 80px; border: 1px solid var(--line); overflow: hidden; }
 .photo-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
