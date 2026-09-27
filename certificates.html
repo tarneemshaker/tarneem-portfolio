@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certificates — Tarneem Shaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">Tarneem Shaker</a>
+    <div class="links">
+      <a class="navlink" href="index.html">Home</a>
+      <a class="navlink" href="projects.html">Projects</a>
+      <a class="navlink active" href="certificates.html">Certificates</a>
+      <a class="navlink" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="section-head">
+    <h1>Certificates</h1>
+    <span class="meta" id="count"></span>
+  </div>
+  <div id="list"></div>
+</main>
+
+<footer><div class="wrap">To add or remove a certificate, edit certificates.json in this repository.</div></footer>
+
+<script>
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+fetch("certificates.json").then(function (r) { return r.json(); }).then(function (certs) {
+  var list = document.getElementById("list");
+  document.getElementById("count").textContent = certs.length + (certs.length === 1 ? " certificate" : " certificates");
+  if (!certs.length) { list.innerHTML = '<div class="empty-state">No certificates yet.</div>'; return; }
+
+  list.innerHTML = certs.map(function (c) {
+    var meta = [c.issuer, c.date].filter(Boolean).join(" · ");
+    var pdf = c.pdf
+      ? '<a class="link" href="' + esc(c.pdf) + '" target="_blank" rel="noopener">View certificate (PDF) →</a>'
+      : '<div class="coming-soon">PDF coming soon</div>';
+    return (
+      '<div class="card">' +
+        "<h3>" + esc(c.title) + "</h3>" +
+        (meta ? '<div class="ctx">' + esc(meta) + "</div>" : "") +
+        pdf +
+      "</div>"
+    );
+  }).join("");
+}).catch(function () {
+  document.getElementById("list").innerHTML = '<div class="empty-state">Couldn\'t load certificates.json.</div>';
+});
+</script>
+
+</body>
+</html>

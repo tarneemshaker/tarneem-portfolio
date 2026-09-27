@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects — Tarneem Shaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">Tarneem Shaker</a>
+    <div class="links">
+      <a class="navlink" href="index.html">Home</a>
+      <a class="navlink active" href="projects.html">Projects</a>
+      <a class="navlink" href="certificates.html">Certificates</a>
+      <a class="navlink" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="section-head">
+    <h1>Projects</h1>
+    <span class="meta" id="count"></span>
+  </div>
+  <div id="list"></div>
+</main>
+
+<footer><div class="wrap">To add or remove a project, edit projects.json in this repository.</div></footer>
+
+<script>
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+fetch("projects.json").then(function (r) { return r.json(); }).then(function (projects) {
+  var list = document.getElementById("list");
+  document.getElementById("count").textContent = projects.length + (projects.length === 1 ? " project" : " projects");
+  if (!projects.length) { list.innerHTML = '<div class="empty-state">No projects yet.</div>'; return; }
+
+  list.innerHTML = projects.map(function (p, i) {
+    var tags = (p.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+    var link = p.link ? '<a class="link" href="' + esc(p.link) + '" target="_blank" rel="noopener">View →</a>' : "";
+
+    var photos = "";
+    if (p.photos && p.photos.length) {
+      photos = '<div class="photo-strip">' + p.photos.map(function (src) {
+        return '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt=""></a>';
+      }).join("") + "</div>";
+    }
+
+    var files = "";
+    if (p.files && p.files.length) {
+      files = '<ul class="file-list">' + p.files.map(function (f) {
+        return '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.name) + "</a></li>";
+      }).join("") + "</ul>";
+    }
+
+    return (
+      '<div class="card">' +
+        '<span class="sheet-no">DWG-' + String(i + 1).padStart(2, "0") + "</span>" +
+        "<h3>" + esc(p.title) + "</h3>" +
+        (p.context ? '<div class="ctx">' + esc(p.context) + "</div>" : "") +
+        "<p>" + esc(p.desc) + "</p>" +
+        photos +
+        '<div class="tags">' + tags + "</div>" +
+        files +
+        link +
+      "</div>"
+    );
+  }).join("");
+}).catch(function () {
+  document.getElementById("list").innerHTML = '<div class="empty-state">Couldn\'t load projects.json.</div>';
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "gcode-toolpath",
+    "title": "G-Code Toolpath Generator & Analyzer",
+    "context": "Personal project",
+    "desc": "A Python command-line tool that generates and analyzes CNC G-code for pocket milling operations, applying toolpath logic such as multi-pass depth cutting and tool radius compensation alongside argument parsing, regex-based file parsing and geometry calculations.",
+    "tags": ["Python", "G-Code", "CNC"],
+    "link": "",
+    "photos": [],
+    "files": []
+  },
+  {
+    "id": "footstep-energy",
+    "title": "Footstep Energy Harvesting System",
+    "context": "BSc thesis project",
+    "desc": "Designed the mechanical assembly of a rack-and-pinion footstep energy harvesting system in SolidWorks — loading platform, spring return mechanism, transmission housing, flywheel and structural frame. Ran fatigue life analysis (S-N curves, Miner's rule) across a realistic pedestrian load spectrum, identifying the spring as the system-limiting component, and completed an FMEA to rank failure modes and shape a preventive maintenance plan.",
+    "tags": ["SolidWorks", "FMEA", "Fatigue analysis"],
+    "link": "",
+    "photos": [],
+    "files": []
+  }
+]
