@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project — Tarneem Shaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">Tarneem Shaker</a>
+    <div class="links">
+      <a class="navlink" href="index.html">Home</a>
+      <a class="navlink active" href="projects.html">Projects</a>
+      <a class="navlink" href="certificates.html">Certificates</a>
+      <a class="navlink" href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <a class="back-link" href="projects.html">← Back to projects</a>
+  <div id="detail"><div class="empty-state">Loading…</div></div>
+</main>
+
+<script>
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+var id = new URLSearchParams(window.location.search).get("id");
+var detail = document.getElementById("detail");
+
+fetch("projects.json").then(function (r) { return r.json(); }).then(function (projects) {
+  var p = projects.find(function (proj) { return proj.id === id; });
+  if (!p) { detail.innerHTML = '<div class="empty-state">Project not found.</div>'; return; }
+
+  document.title = p.title + " — Tarneem Shaker";
+
+  var tags = (p.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+  var extLink = p.link ? '<a class="link" href="' + esc(p.link) + '" target="_blank" rel="noopener">External link →</a>' : "";
+
+  var photosHtml = "";
+  if (p.photos && p.photos.length) {
+    photosHtml =
+      '<div class="detail-block"><h2>Photos</h2><div class="photo-gallery">' +
+      p.photos.map(function (src) {
+        return '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt=""></a>';
+      }).join("") +
+      "</div></div>";
+  }
+
+  var filesHtml = "";
+  if (p.files && p.files.length) {
+    filesHtml =
+      '<div class="detail-block"><h2>Files</h2><ul class="file-list">' +
+      p.files.map(function (f) {
+        return '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.name) + "</a></li>";
+      }).join("") +
+      "</ul></div>";
+  }
+
+  detail.innerHTML =
+    '<div class="detail-head">' +
+      "<h1>" + esc(p.title) + "</h1>" +
+      (p.context ? '<div class="ctx">' + esc(p.context) + "</div>" : "") +
+      '<div class="tags" style="margin-top:12px;">' + tags + "</div>" +
+    "</div>" +
+    '<div class="detail-block"><p>' + esc(p.desc) + "</p>" + extLink + "</div>" +
+    photosHtml +
+    filesHtml;
+}).catch(function () {
+  detail.innerHTML = '<div class="empty-state">Couldn\'t load this project.</div>';
+});
+</script>
+
+</body>
+</html>
