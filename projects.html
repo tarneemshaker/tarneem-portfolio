@@ -32,7 +32,7 @@
 </main>
 
 
-  
+
 <script>
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -46,33 +46,19 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
 
   list.innerHTML = projects.map(function (p, i) {
     var tags = (p.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
-    var link = p.link ? '<a class="link" href="' + esc(p.link) + '" target="_blank" rel="noopener">View →</a>' : "";
-
-    var photos = "";
-    if (p.photos && p.photos.length) {
-      photos = '<div class="photo-strip">' + p.photos.map(function (src) {
-        return '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt=""></a>';
-      }).join("") + "</div>";
-    }
-
-    var files = "";
-    if (p.files && p.files.length) {
-      files = '<ul class="file-list">' + p.files.map(function (f) {
-        return '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.name) + "</a></li>";
-      }).join("") + "</ul>";
-    }
+    var photoCount = (p.photos && p.photos.length) ? p.photos.length + (p.photos.length === 1 ? " photo" : " photos") : "";
+    var fileCount = (p.files && p.files.length) ? p.files.length + (p.files.length === 1 ? " file" : " files") : "";
+    var counts = [photoCount, fileCount].filter(Boolean).join(" · ");
 
     return (
-      '<div class="card">' +
+      '<a class="card card-link" href="project.html?id=' + encodeURIComponent(p.id) + '">' +
         '<span class="sheet-no">DWG-' + String(i + 1).padStart(2, "0") + "</span>" +
         "<h3>" + esc(p.title) + "</h3>" +
         (p.context ? '<div class="ctx">' + esc(p.context) + "</div>" : "") +
         "<p>" + esc(p.desc) + "</p>" +
-        photos +
         '<div class="tags">' + tags + "</div>" +
-        files +
-        link +
-      "</div>"
+        (counts ? '<div class="ctx" style="margin-top:12px;">' + esc(counts) + "</div>" : "") +
+      "</a>"
     );
   }).join("");
 }).catch(function () {
