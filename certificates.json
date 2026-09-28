@@ -4,23 +4,23 @@
     "title": "Internship Certificate — Teriak Group",
     "issuer": "Teriak Group",
     "date": "Sep 2025",
-    "image": "certificates/internship.jpg",
-    "pdf": "certificates/internship.pdf"
+    "image": "internship.jpg",
+    "pdf": "internship.pdf"
   },
   {
     "id": "bachelor-degree",
     "title": "Bachelor's Degree — Mechanical Engineering",
     "issuer": "University of Dunaújváros",
     "date": "Jun 2026",
-    "image": "certificates/bachelor-degree.jpg",
-    "pdf": "certificates/bachelor-degree.pdf"
+    "image": "bachelor-degree.jpg",
+    "pdf": "bachelor-degree.pdf"
   },
   {
     "id": "bic-foundation",
     "title": "University Foundation Program — Professional Track",
     "issuer": "Budapest International College",
     "date": "Jun 2023",
-    "image": "certificates/foundation-program.jpg",
-    "pdf": "certificates/foundation-program.pdf"
+    "image": "foundation-program.jpg",
+    "pdf": "foundation-program.pdf"
   }
 ]
