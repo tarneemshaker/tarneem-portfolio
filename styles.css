@@ -127,6 +127,20 @@ a.card-link:hover { border-color: var(--accent); transform: translateY(-2px); }
 .empty-state { border: 1px dashed var(--line); padding: 32px; text-align: center; color: var(--muted); font-size: 0.92rem; }
 .coming-soon { color: var(--muted); font-size: 0.85rem; font-style: italic; }
 
+/* ---- CERTIFICATE TILES ---- */
+.cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.cert-tile {
+  display: block; text-decoration: none; color: inherit;
+  border: 1px solid var(--line); background: var(--panel);
+  overflow: hidden; transition: border-color .15s, transform .15s;
+}
+.cert-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.cert-tile img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; background: var(--panel-2); }
+.cert-tile.no-image { aspect-ratio: 3 / 4; display: flex; align-items: flex-end; }
+.cert-caption { padding: 12px 14px; }
+.cert-caption h3 { font-size: 0.92rem; line-height: 1.3; margin-bottom: 4px; }
+.cert-caption .ctx { font-size: 0.8rem; margin-bottom: 0; }
+
 /* ---- CONTACT ---- */
 .contact-list { display: flex; flex-direction: column; gap: 14px; max-width: 360px; }
 .contact-list a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 4px; font-size: 1rem; }
