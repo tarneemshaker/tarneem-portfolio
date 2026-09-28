@@ -28,11 +28,11 @@
     <h1>Certificates</h1>
     <span class="meta" id="count"></span>
   </div>
-  <div id="list"></div>
+  <div id="list" class="cert-grid"></div>
 </main>
 
 
-  
+
 <script>
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -46,15 +46,22 @@ fetch("certificates.json").then(function (r) { return r.json(); }).then(function
 
   list.innerHTML = certs.map(function (c) {
     var meta = [c.issuer, c.date].filter(Boolean).join(" · ");
-    var pdf = c.pdf
-      ? '<a class="link" href="' + esc(c.pdf) + '" target="_blank" rel="noopener">View certificate (PDF) →</a>'
-      : '<div class="coming-soon">PDF coming soon</div>';
+    if (!c.image) {
+      return (
+        '<div class="cert-tile no-image">' +
+          '<div class="cert-caption"><h3>' + esc(c.title) + "</h3>" +
+          (meta ? '<div class="ctx">' + esc(meta) + "</div>" : "") +
+          '<div class="coming-soon">Photo coming soon</div></div>' +
+        "</div>"
+      );
+    }
     return (
-      '<div class="card">' +
-        "<h3>" + esc(c.title) + "</h3>" +
+      '<a class="cert-tile" href="' + esc(c.image) + '" target="_blank" rel="noopener">' +
+        '<img src="' + esc(c.image) + '" alt="' + esc(c.title) + '">' +
+        '<div class="cert-caption"><h3>' + esc(c.title) + "</h3>" +
         (meta ? '<div class="ctx">' + esc(meta) + "</div>" : "") +
-        pdf +
-      "</div>"
+        "</div>" +
+      "</a>"
     );
   }).join("");
 }).catch(function () {
