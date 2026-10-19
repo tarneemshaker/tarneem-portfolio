@@ -22,5 +22,21 @@
     "date": "Jun 2023",
     "image": "foundation-program.jpg",
     "pdf": "foundation-program.pdf"
+  },
+  {
+    "id": "sap-fundamentals",
+    "title": "SAP Professional Fundamentals",
+    "issuer": "SAP via Coursera",
+    "date": "Oct 2026",
+    "image": "sap-fundamentals.jpg",
+    "pdf": "sap-fundamentals.pdf"
+  },
+  {
+    "id": "hvac-systems",
+    "title": "HVAC Systems",
+    "issuer": "Interplay Learning via Coursera",
+    "date": "Oct 2026",
+    "image": "hvac-systems.jpg",
+    "pdf": "hvac-systems.pdf"
   }
 ]
