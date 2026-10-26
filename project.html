@@ -67,6 +67,8 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
       "</ul></div>";
   }
 
+  var extraHtml = p.extra === "gcode-toolpath" ? GCODE_README_HTML + GCODE_CALC_HTML : "";
+
   detail.innerHTML =
     '<div class="detail-head">' +
       "<h1>" + esc(p.title) + "</h1>" +
@@ -75,10 +77,244 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
     "</div>" +
     '<div class="detail-block"><p>' + esc(p.desc) + "</p>" + extLink + "</div>" +
     photosHtml +
-    filesHtml;
+    filesHtml +
+    extraHtml;
+
+  if (p.extra === "gcode-toolpath") wireGcodeCalculator();
 }).catch(function () {
   detail.innerHTML = '<div class="empty-state">Couldn\'t load this project.</div>';
 });
+
+/* ================================================================
+   G-Code Toolpath project — embedded README + live calculator.
+   Ported from gcode_toolpath_tool.py so it runs entirely in the
+   browser, no server or download needed.
+   ================================================================ */
+
+var GCODE_README_HTML =
+  '<div class="detail-block readme-content">' +
+    '<h2>About this project</h2>' +
+    '<p>A small Python CLI tool for CNC machining, built to practice programmatic G-code generation and parsing.</p>' +
+    '<p><strong>Generate</strong> — creates G-code for a rectangular pocket milling operation: a raster (zig-zag) toolpath, cut in multiple depth passes, from simple parameters (width, height, depth, tool diameter, stepover, feed rate).</p>' +
+    '<p><strong>Analyze</strong> — reads any existing G-code file and reports total rapid (G0) travel distance, total feed (G1/G2/G3) travel distance, number of tool changes, and estimated machining time based on the feed rates in the file.</p>' +
+    '</div>' +
+  '<div class="detail-block readme-content">' +
+    '<h2>Why I built it</h2>' +
+    '<p>To understand what CAM software is actually generating under the hood, and to practice using Python (regex and basic geometry) to both produce and interpret G-code rather than only using it through a machine controller.</p>' +
+    '</div>' +
+  '<div class="detail-block readme-content">' +
+    '<h2>Command-line usage</h2>' +
+    '<pre class="gc-code">python gcode_toolpath_tool.py generate \\\n' +
+    '    --width 40 --height 20 --depth 6 \\\n' +
+    '    --tool-diameter 6 --stepover 0.5 \\\n' +
+    '    --feed 300 --plunge-rate 100 \\\n' +
+    '    --output pocket.nc\n\n' +
+    'python gcode_toolpath_tool.py analyze pocket.nc</pre>' +
+    '</div>' +
+  '<div class="detail-block readme-content">' +
+    '<h2>Limitations</h2>' +
+    '<ul>' +
+      '<li>Only handles rectangular pockets, not arbitrary contours.</li>' +
+      '<li>Uses a simplified time estimate — real machines have acceleration and deceleration this doesn’t model.</li>' +
+      '<li>Doesn’t account for tool wear or climb vs. conventional milling direction.</li>' +
+    '</ul>' +
+  '</div>';
+
+var GCODE_CALC_HTML =
+  '<div class="detail-block">' +
+    '<h2>Try it — generate a pocket toolpath</h2>' +
+    '<p style="margin-bottom:16px;">This runs the same logic as the Python script, right here in the page. Enter your pocket parameters and generate real G-code.</p>' +
+    '<div class="calc-grid">' +
+      '<label>Width (mm)<input type="number" id="gc-width" value="40" step="any"></label>' +
+      '<label>Height (mm)<input type="number" id="gc-height" value="20" step="any"></label>' +
+      '<label>Depth (mm)<input type="number" id="gc-depth" value="6" step="any"></label>' +
+      '<label>Tool diameter (mm)<input type="number" id="gc-tool" value="6" step="any"></label>' +
+      '<label>Stepover (fraction of tool dia.)<input type="number" id="gc-stepover" value="0.5" step="0.05"></label>' +
+      '<label>Feed rate (mm/min)<input type="number" id="gc-feed" value="300" step="any"></label>' +
+      '<label>Plunge rate (mm/min)<input type="number" id="gc-plunge" value="100" step="any"></label>' +
+      '<label>Depth per pass (mm)<input type="number" id="gc-dpp" value="2" step="any"></label>' +
+    '</div>' +
+    '<button class="btn" id="gc-generate-btn" type="button">Generate G-code</button>' +
+    '<div class="gc-error" id="gc-error"></div>' +
+    '<div id="gc-output" style="display:none;">' +
+      '<h2 style="margin-top:24px;">Generated G-code</h2>' +
+      '<pre class="gc-code" id="gc-code-output"></pre>' +
+      '<button class="btn secondary" id="gc-download-btn" type="button">Download .nc file</button>' +
+      '<h2 style="margin-top:24px;">Analysis</h2>' +
+      '<div class="spec-table" id="gc-stats"></div>' +
+    '</div>' +
+  '</div>';
+
+function generatePocketGcode(params) {
+  var width = params.width, height = params.height, depth = params.depth,
+      toolDiameter = params.toolDiameter, stepover = params.stepover,
+      feedrate = params.feedrate, plungeRate = params.plungeRate,
+      safeZ = params.safeZ, depthPerPass = params.depthPerPass;
+
+  var step = toolDiameter * stepover;
+  if (!(step > 0)) throw new Error("Stepover must be greater than 0.");
+
+  var radius = toolDiameter / 2;
+  var xMin = radius, xMax = width - radius;
+  var yMin = radius, yMax = height - radius;
+  if (xMax <= xMin || yMax <= yMin) throw new Error("Tool diameter is too large for this pocket size.");
+
+  var nDepthPasses = Math.max(1, Math.ceil(depth / depthPerPass));
+  var nYLines = Math.max(1, Math.ceil((yMax - yMin) / step) + 1);
+
+  var lines = [];
+  lines.push("; Rectangular pocket - generated by gcode_toolpath_tool.py");
+  lines.push("; width=" + width + "mm height=" + height + "mm depth=" + depth + "mm tool_dia=" + toolDiameter + "mm stepover=" + stepover);
+  lines.push("G21 ; units = mm");
+  lines.push("G90 ; absolute positioning");
+  lines.push("G0 Z" + safeZ.toFixed(3));
+  lines.push("G0 X" + xMin.toFixed(3) + " Y" + yMin.toFixed(3));
+
+  for (var passNum = 1; passNum <= nDepthPasses; passNum++) {
+    var currentZ = -Math.min(depth, depthPerPass * passNum);
+    lines.push("; --- depth pass " + passNum + "/" + nDepthPasses + ", Z=" + currentZ.toFixed(3) + " ---");
+    lines.push("G1 Z" + currentZ.toFixed(3) + " F" + plungeRate);
+
+    var goingRight = true;
+    for (var i = 0; i < nYLines; i++) {
+      var y = Math.min(yMin + i * step, yMax);
+      var xTarget = goingRight ? xMax : xMin;
+      lines.push("G1 X" + xTarget.toFixed(3) + " Y" + y.toFixed(3) + " F" + feedrate);
+      if (i < nYLines - 1) {
+        var nextY = Math.min(yMin + (i + 1) * step, yMax);
+        lines.push("G1 Y" + nextY.toFixed(3) + " F" + feedrate);
+      }
+      goingRight = !goingRight;
+    }
+
+    lines.push("G0 Z" + safeZ.toFixed(3));
+    lines.push("G0 X" + xMin.toFixed(3) + " Y" + yMin.toFixed(3));
+  }
+
+  lines.push("M5 ; spindle off");
+  lines.push("M2 ; program end");
+  return lines;
+}
+
+function analyzeGcodeLines(lines) {
+  var rapidDistance = 0, feedDistance = 0, toolChanges = 0, timeSeconds = 0;
+  var current = { X: 0, Y: 0, Z: 0 };
+  var currentFeed = null;
+  var lineCount = 0;
+  var coordRe = /([XYZ])(-?\d+\.?\d*)/g;
+  var feedRe = /F(\d+\.?\d*)/;
+
+  lines.forEach(function (rawLine) {
+    var line = rawLine.split(";")[0].trim();
+    if (!line) return;
+    lineCount++;
+
+    if (line.toUpperCase().indexOf("T") === 0) toolChanges++;
+
+    var feedMatch = feedRe.exec(line);
+    if (feedMatch) currentFeed = parseFloat(feedMatch[1]);
+
+    var upper = line.toUpperCase();
+    var isRapid = upper.indexOf("G0") === 0 || upper.indexOf(" G0") !== -1;
+    var isFeedMove = upper.indexOf("G1") === 0 || upper.indexOf("G2") === 0 || upper.indexOf("G3") === 0;
+
+    if (isRapid || isFeedMove) {
+      var target = { X: current.X, Y: current.Y, Z: current.Z };
+      var m;
+      coordRe.lastIndex = 0;
+      while ((m = coordRe.exec(line)) !== null) { target[m[1]] = parseFloat(m[2]); }
+
+      var dist = Math.sqrt(
+        Math.pow(target.X - current.X, 2) +
+        Math.pow(target.Y - current.Y, 2) +
+        Math.pow(target.Z - current.Z, 2)
+      );
+
+      if (isRapid) {
+        rapidDistance += dist;
+        timeSeconds += dist / (5000 / 60);
+      } else {
+        feedDistance += dist;
+        if (currentFeed) timeSeconds += dist / (currentFeed / 60);
+      }
+      current = target;
+    }
+  });
+
+  return {
+    linesParsed: lineCount,
+    rapidDistanceMm: Math.round(rapidDistance * 100) / 100,
+    feedDistanceMm: Math.round(feedDistance * 100) / 100,
+    toolChanges: toolChanges,
+    estimatedTimeMin: Math.round((timeSeconds / 60) * 100) / 100
+  };
+}
+
+function wireGcodeCalculator() {
+  var btn = document.getElementById("gc-generate-btn");
+  var downloadBtn = document.getElementById("gc-download-btn");
+  var errorEl = document.getElementById("gc-error");
+  var outputEl = document.getElementById("gc-output");
+  var codeEl = document.getElementById("gc-code-output");
+  var statsEl = document.getElementById("gc-stats");
+  var lastCode = "";
+
+  if (!btn) return;
+
+  btn.addEventListener("click", function () {
+    errorEl.textContent = "";
+    outputEl.style.display = "none";
+
+    var params = {
+      width: parseFloat(document.getElementById("gc-width").value),
+      height: parseFloat(document.getElementById("gc-height").value),
+      depth: parseFloat(document.getElementById("gc-depth").value),
+      toolDiameter: parseFloat(document.getElementById("gc-tool").value),
+      stepover: parseFloat(document.getElementById("gc-stepover").value),
+      feedrate: parseFloat(document.getElementById("gc-feed").value),
+      plungeRate: parseFloat(document.getElementById("gc-plunge").value),
+      safeZ: 5.0,
+      depthPerPass: parseFloat(document.getElementById("gc-dpp").value)
+    };
+
+    for (var key in params) {
+      if (isNaN(params[key])) {
+        errorEl.textContent = "Please fill in every field with a number.";
+        return;
+      }
+    }
+
+    try {
+      var lines = generatePocketGcode(params);
+      var stats = analyzeGcodeLines(lines);
+      lastCode = lines.join("\n");
+
+      codeEl.textContent = lastCode;
+      statsEl.innerHTML =
+        '<div class="r"><span>Lines generated</span><span>' + stats.linesParsed + '</span></div>' +
+        '<div class="r"><span>Rapid (G0) travel</span><span>' + stats.rapidDistanceMm + ' mm</span></div>' +
+        '<div class="r"><span>Feed (G1) travel</span><span>' + stats.feedDistanceMm + ' mm</span></div>' +
+        '<div class="r"><span>Tool changes</span><span>' + stats.toolChanges + '</span></div>' +
+        '<div class="r"><span>Estimated machine time</span><span>' + stats.estimatedTimeMin + ' min</span></div>';
+      outputEl.style.display = "block";
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+
+  downloadBtn.addEventListener("click", function () {
+    if (!lastCode) return;
+    var blob = new Blob([lastCode + "\n"], { type: "text/plain" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "pocket.nc";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
 </script>
 
 </body>
