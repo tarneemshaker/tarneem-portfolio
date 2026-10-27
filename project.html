@@ -51,8 +51,15 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
   if (p.photos && p.photos.length) {
     photosHtml =
       '<div class="detail-block"><h2>Photos</h2><div class="photo-gallery">' +
-      p.photos.map(function (src) {
-        return '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt=""></a>';
+      p.photos.map(function (photo) {
+        var src = typeof photo === "string" ? photo : photo.src;
+        var caption = typeof photo === "object" && photo.caption ? photo.caption : "";
+        return (
+          '<figure class="photo-item">' +
+            '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt="' + esc(caption) + '"></a>' +
+            (caption ? '<figcaption>' + esc(caption) + "</figcaption>" : "") +
+          "</figure>"
+        );
       }).join("") +
       "</div></div>";
   }
@@ -69,13 +76,17 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
 
   var extraHtml = p.extra === "gcode-toolpath" ? GCODE_README_HTML + GCODE_CALC_HTML : "";
 
+  var descHtml = (p.writeup && p.writeup.length)
+    ? p.writeup.map(function (para) { return "<p>" + esc(para) + "</p>"; }).join("")
+    : "<p>" + esc(p.desc) + "</p>";
+
   detail.innerHTML =
     '<div class="detail-head">' +
       "<h1>" + esc(p.title) + "</h1>" +
       (p.context ? '<div class="ctx">' + esc(p.context) + "</div>" : "") +
       '<div class="tags" style="margin-top:12px;">' + tags + "</div>" +
     "</div>" +
-    '<div class="detail-block"><p>' + esc(p.desc) + "</p>" + extLink + "</div>" +
+    '<div class="detail-block">' + descHtml + extLink + "</div>" +
     photosHtml +
     filesHtml +
     extraHtml;
