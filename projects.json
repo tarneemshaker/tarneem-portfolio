@@ -4,7 +4,11 @@
     "title": "G-Code Toolpath Generator & Analyzer",
     "context": "Personal project",
     "desc": "A Python command-line tool that generates and analyzes CNC G-code for pocket milling operations, applying toolpath logic such as multi-pass depth cutting and tool radius compensation alongside argument parsing, regex-based file parsing and geometry calculations.",
-    "tags": ["Python", "G-Code", "CNC"],
+    "tags": [
+      "Python",
+      "G-Code",
+      "CNC"
+    ],
     "link": "",
     "extra": "gcode-toolpath",
     "photos": [],
@@ -19,7 +23,11 @@
       "For my BSc thesis in Mechanical Engineering at the University of Dunaújváros, I analysed the mechanical durability and maintenance requirements of a footstep-powered energy harvesting system — a device that converts the ground reaction forces of human walking into electrical energy through a rack-and-pinion transmission coupled to an electromagnetic generator. While most existing research in this field focuses exclusively on electrical output, my thesis addressed the largely unexplored mechanical side of the problem: how long do the components actually last, what fails first, and how should the system be maintained to remain safe and operational over years of continuous use in public spaces such as metro stations and airports.",
       "The study covered a detailed load analysis tracing pedestrian forces through every link of the kinematic chain, and fatigue life estimation for each critical component using S-N curve analysis and Miner's cumulative damage rule applied to a realistic pedestrian load spectrum. A structured Failure Mode and Effects Analysis ranked all failure modes by risk priority, identifying the spring return mechanism as the system-limiting component due to its complete stress cycle with every single footstep and its sudden, undetectable failure mode. Based on these findings, I developed a preventive maintenance plan with justified service intervals and proposed a set of targeted design improvements including spring material upgrades to chrome-vanadium alloy, shot peening, case-hardened gear teeth, sealed bearings, and an integrated passive lubrication system that together significantly extend component service life and reduce the maintenance burden for real-world deployment."
     ],
-    "tags": ["SolidWorks", "FMEA", "Fatigue analysis"],
+    "tags": [
+      "SolidWorks",
+      "FMEA",
+      "Fatigue analysis"
+    ],
     "link": "",
     "photos": [
       {
