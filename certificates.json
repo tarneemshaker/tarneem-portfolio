@@ -39,12 +39,4 @@
     "image": "hvac-systems.jpg",
     "pdf": "hvac-systems.pdf"
   },
-  {
-    "id": "Introduction to Programming with MATLAB",
-    "title": "MATLAB",
-    "issuer": "Vanderbilt University",
-    "date": "Nov 2026",
-    "image": "MATLAB.jpg",
-    "pdf": "MATLAB.pdf"
-  },
 ]
