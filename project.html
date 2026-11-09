@@ -47,19 +47,16 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
   var tags = (p.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
   var extLink = p.link ? '<a class="link" href="' + esc(p.link) + '" target="_blank" rel="noopener">External link →</a>' : "";
 
+  var hasStructuredWriteup = p.writeup && p.writeup.length && p.writeup.some(function (b) { return typeof b === "object"; });
+
   var photosHtml = "";
-  if (p.photos && p.photos.length) {
+  if (!hasStructuredWriteup && p.photos && p.photos.length) {
     photosHtml =
-      '<div class="detail-block"><h2>Photos</h2><div class="photo-gallery">' +
+      '<div class="detail-block"><div class="photo-gallery">' +
       p.photos.map(function (photo) {
         var src = typeof photo === "string" ? photo : photo.src;
-        var caption = typeof photo === "object" && photo.caption ? photo.caption : "";
-        return (
-          '<figure class="photo-item">' +
-            '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt="' + esc(caption) + '"></a>' +
-            (caption ? '<figcaption>' + esc(caption) + "</figcaption>" : "") +
-          "</figure>"
-        );
+        var alt = typeof photo === "object" && photo.alt ? photo.alt : "";
+        return '<a href="' + esc(src) + '" target="_blank" rel="noopener"><img src="' + esc(src) + '" alt="' + esc(alt) + '"></a>';
       }).join("") +
       "</div></div>";
   }
@@ -76,9 +73,22 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
 
   var extraHtml = p.extra === "gcode-toolpath" ? GCODE_README_HTML + GCODE_CALC_HTML : "";
 
-  var descHtml = (p.writeup && p.writeup.length)
-    ? p.writeup.map(function (para) { return "<p>" + esc(para) + "</p>"; }).join("")
-    : "<p>" + esc(p.desc) + "</p>";
+  var descHtml;
+  if (p.writeup && p.writeup.length) {
+    descHtml =
+      '<div class="detail-block article-body">' +
+      p.writeup.map(function (block) {
+        if (typeof block === "string") return "<p>" + esc(block) + "</p>";
+        if (block && block.type === "image") {
+          return '<div class="article-figure"><img src="' + esc(block.src) + '" alt="' + esc(block.alt || "") + '"></div>';
+        }
+        return "";
+      }).join("") +
+      extLink +
+      "</div>";
+  } else {
+    descHtml = '<div class="detail-block"><p>' + esc(p.desc) + "</p>" + extLink + "</div>";
+  }
 
   detail.innerHTML =
     '<div class="detail-head">' +
@@ -86,7 +96,7 @@ fetch("projects.json").then(function (r) { return r.json(); }).then(function (pr
       (p.context ? '<div class="ctx">' + esc(p.context) + "</div>" : "") +
       '<div class="tags" style="margin-top:12px;">' + tags + "</div>" +
     "</div>" +
-    '<div class="detail-block">' + descHtml + extLink + "</div>" +
+    descHtml +
     photosHtml +
     filesHtml +
     extraHtml;
