@@ -4,11 +4,7 @@
     "title": "G-Code Toolpath Generator & Analyzer",
     "context": "Personal project",
     "desc": "A Python command-line tool that generates and analyzes CNC G-code for pocket milling operations, applying toolpath logic such as multi-pass depth cutting and tool radius compensation alongside argument parsing, regex-based file parsing and geometry calculations.",
-    "tags": [
-      "Python",
-      "G-Code",
-      "CNC"
-    ],
+    "tags": ["Python", "G-Code", "CNC"],
     "link": "",
     "extra": "gcode-toolpath",
     "photos": [],
@@ -23,16 +19,41 @@
       "For my BSc thesis in Mechanical Engineering at the University of Dunaújváros, I analysed the mechanical durability and maintenance requirements of a footstep-powered energy harvesting system — a device that converts the ground reaction forces of human walking into electrical energy through a rack-and-pinion transmission coupled to an electromagnetic generator. While most existing research in this field focuses exclusively on electrical output, my thesis addressed the largely unexplored mechanical side of the problem: how long do the components actually last, what fails first, and how should the system be maintained to remain safe and operational over years of continuous use in public spaces such as metro stations and airports.",
       "The study covered a detailed load analysis tracing pedestrian forces through every link of the kinematic chain, and fatigue life estimation for each critical component using S-N curve analysis and Miner's cumulative damage rule applied to a realistic pedestrian load spectrum. A structured Failure Mode and Effects Analysis ranked all failure modes by risk priority, identifying the spring return mechanism as the system-limiting component due to its complete stress cycle with every single footstep and its sudden, undetectable failure mode. Based on these findings, I developed a preventive maintenance plan with justified service intervals and proposed a set of targeted design improvements including spring material upgrades to chrome-vanadium alloy, shot peening, case-hardened gear teeth, sealed bearings, and an integrated passive lubrication system that together significantly extend component service life and reduce the maintenance burden for real-world deployment."
     ],
-    "tags": [
-      "SolidWorks",
-      "FMEA",
-      "Fatigue analysis"
-    ],
+    "tags": ["SolidWorks", "FMEA", "Fatigue analysis"],
     "link": "",
     "photos": [
       {
         "src": "footstep-diagram.png",
         "caption": "Engineering drawing of the platform assembly — top, side-section and front views, showing the spring-loaded rack-and-pinion transmission housed within the structural frame (dimensions in mm)."
+      }
+    ],
+    "files": []
+  },
+  {
+    "id": "matlab-predictive-maintenance",
+    "title": "Rotating Machinery Fault Detection & Predictive Maintenance",
+    "context": "Personal project",
+    "desc": "A MATLAB-based project that simulates rotating-machine vibration signals, extracts engineering indicators via FFT and envelope analysis, classifies four operating conditions with a nearest-centroid classifier, and demonstrates how a bearing condition trend could inform maintenance planning.",
+    "writeup": [
+      "To build on my MATLAB coursework, I developed a mechanical engineering project around vibration signal analysis for rotating machinery fault detection and predictive maintenance. The program generates synthetic motor vibration measurements, extracts engineering indicators from them, classifies four operating conditions — healthy, rotor imbalance, shaft misalignment, and bearing defects — and illustrates how a bearing condition trend could inform maintenance planning.",
+      "The simulation runs at a motor speed of 1,800 rpm with a 4,096 Hz sampling rate and a calculated bearing outer-race fault frequency (BPFO) of 105.30 Hz. Vibration signals are built by combining sinusoidal shaft-rotation components with random noise: imbalance increases the 1× shaft-frequency component, misalignment increases the 2× component, and bearing defects add repeated short resonant impacts. For each of the 96 generated samples, the program extracts five features — overall RMS, 1× and 2× amplitudes, a bearing-frequency envelope indicator, and kurtosis — then splits the data into 72 training and 24 test samples, normalizes the features using the training statistics, and classifies each test sample by its distance to the nearest class centroid.",
+      "The classifier correctly identified all 24 held-out test samples across the four fault categories — 100% test accuracy — as shown in the confusion matrix below. The program also simulates bearing deterioration over 24 operating weeks, tracking a bearing condition indicator against warning and critical thresholds and fitting a linear trend as a demonstration-only remaining-useful-life estimate.",
+      "This exercise connects vibration analysis theory with a practical maintenance workflow: characteristic frequencies can help distinguish between fault mechanisms, while tracking trends over time can support inspection planning. That said, all vibration inputs here were generated synthetically — the classifier hasn't been validated against measured accelerometer data, and the degradation trend doesn't establish a physically validated failure time. A natural next step would be testing the same approach against an independent real bearing dataset, under varying motor speeds and loads, while evaluating false-alarm rates."
+    ],
+    "tags": ["MATLAB", "Signal Processing", "Predictive Maintenance"],
+    "link": "",
+    "photos": [
+      {
+        "src": "matlab-fft-signatures.png",
+        "caption": "Illustrative recreation of the time-domain and frequency-domain signatures used to tell the four fault types apart — not a direct export of the MATLAB run."
+      },
+      {
+        "src": "matlab-confusion-matrix.png",
+        "caption": "Confusion matrix reconstructed from the MATLAB Command Window results — 100% classification accuracy across all four fault categories (24 of 24 test samples)."
+      },
+      {
+        "src": "matlab-degradation-trend.png",
+        "caption": "Conceptual example of a bearing degradation trend against warning and critical thresholds — illustrative, not the MATLAB simulation's direct output."
       }
     ],
     "files": []
